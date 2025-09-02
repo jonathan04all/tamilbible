@@ -13,7 +13,7 @@
     />
     <style>
       body {
-        background-color: #e0f7fa; /* Light cyan background for a fresh look */
+        background-color: #e0f7fa;
         font-family: "Roboto", sans-serif;
         padding: 40px;
         color: #333;
@@ -23,7 +23,7 @@
         min-height: 100vh;
       }
       h1 {
-        color: #00796b; /* Teal color for heading */
+        color: #00796b;
         margin-bottom: 20px;
       }
       .input-container {
@@ -41,7 +41,7 @@
       }
       button {
         padding: 12px 24px;
-        background-color: #00796b; /* Teal button */
+        background-color: #00796b;
         color: white;
         border: none;
         border-radius: 4px;
@@ -50,7 +50,7 @@
         transition: background-color 0.3s;
       }
       button:hover {
-        background-color: #004d40; /* Darker teal on hover */
+        background-color: #004d40;
       }
       canvas {
         border: 1px solid #ccc;
@@ -87,6 +87,22 @@
     </div>
 
     <script>
+      /* ========= CONFIGURABLE SETTINGS ========= */
+      const CONFIG = {
+        canvasWidth: 1920,
+        canvasHeight: 1080,
+        marginTop: 250,
+        marginBottom: 150,
+        marginLeft: 180,
+        marginRight: 180,
+        titleFontSize: 48,
+        verseFontSize: 36,
+        lineHeight: 50,
+        verseSpacing: 20, // extra gap between verses
+        minFontSize: 14, // smallest allowed if verses don't fit
+      };
+      /* ========================================= */
+
       const bookNums = {
         Genesis: 1,
         Exodus: 2,
@@ -286,57 +302,45 @@
         }
         if (!verses.length) return alert("No verses found in range");
 
-        // Wait for fonts to load
         await document.fonts.ready;
 
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d");
-        const width = 1920;
-        const height = 1080;
-        canvas.width = width;
-        canvas.height = height;
-        const leftPadding = 190;
-        const rightPadding = 190;
-        const topMargin = 161; // New top margin limit
-        const bottomMargin = 150; // New bottom margin limit
-        const maxTextWidth = width - leftPadding - rightPadding;
-        const lineHeight = 50; // Increased line height for better readability
-        const titleY = topMargin; // Set title at top margin
-        const verseStartY = titleY + 80; // Adjusted spacing after title
-        const verseFontSizePx = 36; // Increased font size for verses
-        const titleFontSizePx = 48; // Increased font size for title
-        const verseSpacing = lineHeight * 0.5; // Extra space between verses
+        const { canvasWidth, canvasHeight } = CONFIG;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
 
-        // Draw background
+        const maxTextWidth =
+          canvasWidth - CONFIG.marginLeft - CONFIG.marginRight;
+        const titleY = CONFIG.marginTop;
+        const verseStartY = titleY + 80;
+
+        // Background
         ctx.fillStyle = "#000000";
-        ctx.fillRect(0, 0, width, height);
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-        // Set fonts
-        const tamilFont = `${verseFontSizePx}px 'Noto Sans Tamil', sans-serif`;
-        const englishFont = `${verseFontSizePx}px 'Roboto', sans-serif`;
-        const tamilTitleFont = `${titleFontSizePx}px 'Noto Sans Tamil', sans-serif`;
-        const englishTitleFont = `${titleFontSizePx}px 'Roboto', sans-serif`;
+        // Title (Tamil left, English right)
         ctx.fillStyle = "#ffffff";
+        ctx.font = `${CONFIG.titleFontSize}px 'Noto Sans Tamil', sans-serif`;
+        ctx.fillText(
+          `${tamilBook} ${chapter}.${startVerse}-${endVerse}`,
+          CONFIG.marginLeft,
+          titleY
+        );
 
-        // Draw title: Tamil left, English right-aligned
-        ctx.font = tamilTitleFont;
-        const tamilTitle = `${tamilBook} ${chapter}.${startVerse}-${endVerse}`;
-        ctx.fillText(tamilTitle, leftPadding, titleY);
-
-        ctx.font = englishTitleFont;
+        ctx.font = `${CONFIG.titleFontSize}px 'Roboto', sans-serif`;
         const englishTitle = `${englishBook} ${chapter}:${startVerse}-${endVerse}`;
         const englishTitleWidth = ctx.measureText(englishTitle).width;
         ctx.fillText(
           englishTitle,
-          width - rightPadding - englishTitleWidth,
+          canvasWidth - CONFIG.marginRight - englishTitleWidth,
           titleY
         );
 
-        // Function to draw verses with auto font size adjustment if needed
-        let currentVerseFontSize = verseFontSizePx;
+        // Auto font size adjust
+        let currentVerseFontSize = CONFIG.verseFontSize;
         let fits = false;
-        while (!fits && currentVerseFontSize > 10) {
-          // Minimum font size
+        while (!fits && currentVerseFontSize >= CONFIG.minFontSize) {
           fits = true;
           ctx.font = `${currentVerseFontSize}px 'Noto Sans Tamil', sans-serif`;
           let y = verseStartY;
@@ -344,18 +348,16 @@
             const verseText = `${v.verse}. ${v.text}`;
             const verseLines = wrapText(verseText, maxTextWidth, ctx);
             for (let line of verseLines) {
-              if (y + lineHeight > height - bottomMargin) {
+              if (y + CONFIG.lineHeight > canvasHeight - CONFIG.marginBottom) {
                 fits = false;
                 break;
               }
-              y += lineHeight;
+              y += CONFIG.lineHeight;
             }
             if (!fits) break;
-            y += verseSpacing; // Space between verses
+            y += CONFIG.verseSpacing;
           }
-          if (!fits) {
-            currentVerseFontSize -= 2; // Reduce font size
-          }
+          if (!fits) currentVerseFontSize -= 2;
         }
 
         if (!fits) {
@@ -363,30 +365,28 @@
           ctx.font = "24px Arial, sans-serif";
           ctx.fillText(
             "Error: Verses do not fit even with smallest font",
-            leftPadding,
-            height - bottomMargin
+            CONFIG.marginLeft,
+            canvasHeight - CONFIG.marginBottom
           );
           return;
         }
 
-        // Draw verses with final font size
+        // Draw verses
         ctx.font = `${currentVerseFontSize}px 'Noto Sans Tamil', sans-serif`;
         let y = verseStartY;
         verses.forEach((v) => {
           const verseText = `${v.verse}. ${v.text}`;
           const verseLines = wrapText(verseText, maxTextWidth, ctx);
           verseLines.forEach((line) => {
-            ctx.fillText(line, leftPadding, y);
-            y += lineHeight;
+            ctx.fillText(line, CONFIG.marginLeft, y);
+            y += CONFIG.lineHeight;
           });
-          y += verseSpacing; // Space between verses
+          y += CONFIG.verseSpacing;
         });
 
-        // Show action buttons after successful generation
         document.getElementById("actionButtons").style.display = "flex";
       }
 
-      // Function to wrap text to fit width
       function wrapText(text, maxWidth, ctx) {
         const words = text.split(" ");
         const lines = [];
@@ -405,7 +405,6 @@
         return lines;
       }
 
-      // Download button functionality
       document.getElementById("downloadBtn").onclick = function () {
         const canvas = document.getElementById("canvas");
         const link = document.createElement("a");
@@ -414,7 +413,6 @@
         link.click();
       };
 
-      // Copy to clipboard functionality
       document.getElementById("copyBtn").onclick = async function () {
         const canvas = document.getElementById("canvas");
         try {
