@@ -1,184 +1,432 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Bible Verse Image Generator</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        body { background-color: #f0f0f0; font-family: sans-serif; padding: 20px; }
-        input { padding: 10px; width: 300px; }
-        button { padding: 10px 20px; margin-left: 10px; }
-        canvas { border: 1px solid #ccc; margin-top: 20px; }
+      body {
+        background-color: #e0f7fa; /* Light cyan background for a fresh look */
+        font-family: "Roboto", sans-serif;
+        padding: 40px;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+      h1 {
+        color: #00796b; /* Teal color for heading */
+        margin-bottom: 20px;
+      }
+      .input-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      input {
+        padding: 12px;
+        width: 350px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+        margin-right: 10px;
+      }
+      button {
+        padding: 12px 24px;
+        background-color: #00796b; /* Teal button */
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+      }
+      button:hover {
+        background-color: #004d40; /* Darker teal on hover */
+      }
+      canvas {
+        border: 1px solid #ccc;
+        margin-top: 20px;
+        max-width: 100%;
+        height: auto;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+      }
+      .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .action-buttons button {
+        flex: 1;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Bible Verse Image Generator</h1>
-    <input type="text" id="reference" placeholder="e.g., Genesis 2:1-3 or Luke 2.1-13">
-    <button onclick="generateImage()">Generate Image</button>
+    <div class="input-container">
+      <input
+        type="text"
+        id="reference"
+        placeholder="Type.ex- Genesis 2:1-3 or Luke 2.1-13"
+      />
+      <button onclick="generateImage()">Generate Image</button>
+    </div>
     <canvas id="canvas" width="1920" height="1080"></canvas>
+    <div class="action-buttons" id="actionButtons" style="display: none">
+      <button id="downloadBtn">Download PNG</button>
+      <button id="copyBtn">Copy Image to Clipboard</button>
+    </div>
 
     <script>
-        const bookNums = {
-            "Genesis": 1, "Exodus": 2, "Leviticus": 3, "Numbers": 4, "Deuteronomy": 5,
-            "Joshua": 6, "Judges": 7, "Ruth": 8, "1 Samuel": 9, "2 Samuel": 10,
-            "1 Kings": 11, "2 Kings": 12, "1 Chronicles": 13, "2 Chronicles": 14,
-            "Ezra": 15, "Nehemiah": 16, "Esther": 17, "Job": 18, "Psalms": 19, "Proverbs": 20,
-            "Ecclesiastes": 21, "Song of Solomon": 22, "Isaiah": 23, "Jeremiah": 24, "Lamentations": 25,
-            "Ezekiel": 26, "Daniel": 27, "Hosea": 28, "Joel": 29, "Amos": 30, "Obadiah": 31,
-            "Jonah": 32, "Micah": 33, "Nahum": 34, "Habakkuk": 35, "Zephaniah": 36, "Haggai": 37,
-            "Zechariah": 38, "Malachi": 39, "Matthew": 40, "Mark": 41, "Luke": 42, "John": 43,
-            "Acts": 44, "Romans": 45, "1 Corinthians": 46, "2 Corinthians": 47, "Galatians": 48,
-            "Ephesians": 49, "Philippians": 50, "Colossians": 51, "1 Thessalonians": 52, "2 Thessalonians": 53,
-            "1 Timothy": 54, "2 Timothy": 55, "Titus": 56, "Philemon": 57, "Hebrews": 58,
-            "James": 59, "1 Peter": 60, "2 Peter": 61, "1 John": 62, "2 John": 63, "3 John": 64,
-            "Jude": 65, "Revelation": 66
-        };
+      const bookNums = {
+        Genesis: 1,
+        Exodus: 2,
+        Leviticus: 3,
+        Numbers: 4,
+        Deuteronomy: 5,
+        Joshua: 6,
+        Judges: 7,
+        Ruth: 8,
+        "1 Samuel": 9,
+        "2 Samuel": 10,
+        "1 Kings": 11,
+        "2 Kings": 12,
+        "1 Chronicles": 13,
+        "2 Chronicles": 14,
+        Ezra: 15,
+        Nehemiah: 16,
+        Esther: 17,
+        Job: 18,
+        Psalms: 19,
+        Proverbs: 20,
+        Ecclesiastes: 21,
+        "Song of Solomon": 22,
+        Isaiah: 23,
+        Jeremiah: 24,
+        Lamentations: 25,
+        Ezekiel: 26,
+        Daniel: 27,
+        Hosea: 28,
+        Joel: 29,
+        Amos: 30,
+        Obadiah: 31,
+        Jonah: 32,
+        Micah: 33,
+        Nahum: 34,
+        Habakkuk: 35,
+        Zephaniah: 36,
+        Haggai: 37,
+        Zechariah: 38,
+        Malachi: 39,
+        Matthew: 40,
+        Mark: 41,
+        Luke: 42,
+        John: 43,
+        Acts: 44,
+        Romans: 45,
+        "1 Corinthians": 46,
+        "2 Corinthians": 47,
+        Galatians: 48,
+        Ephesians: 49,
+        Philippians: 50,
+        Colossians: 51,
+        "1 Thessalonians": 52,
+        "2 Thessalonians": 53,
+        "1 Timothy": 54,
+        "2 Timothy": 55,
+        Titus: 56,
+        Philemon: 57,
+        Hebrews: 58,
+        James: 59,
+        "1 Peter": 60,
+        "2 Peter": 61,
+        "1 John": 62,
+        "2 John": 63,
+        "3 John": 64,
+        Jude: 65,
+        Revelation: 66,
+      };
 
-        const tamilBookNames = {
-            "Genesis": "ஆதியாகமம்", "Exodus": "யாத்திராகமம்", "Leviticus": "லேவியராகமம்", "Numbers": "எண்ணாகமம்", "Deuteronomy": "உபாகமம்",
-            "Joshua": "யோசுவா", "Judges": "நியாயாதிபதிகள்", "Ruth": "ரூத்", "1 Samuel": "1 சாமுவேல்", "2 Samuel": "2 சாமுவேல்",
-            "1 Kings": "1 இராஜாக்கள்", "2 Kings": "2 இராஜாக்கள்", "1 Chronicles": "1 நாளாகமம்", "2 Chronicles": "2 நாளாகமம்",
-            "Ezra": "எஸ்றா", "Nehemiah": "நெகேமியா", "Esther": "எஸ்தர்", "Job": "யோபு", "Psalms": "சங்கீதம்", "Proverbs": "நீதிமொழிகள்",
-            "Ecclesiastes": "பிரசங்கி", "Song of Solomon": "உன்னதப்பாட்டு", "Isaiah": "ஏசாயா", "Jeremiah": "எரேமியா", "Lamentations": "புலம்பல்",
-            "Ezekiel": "எசேக்கியேல்", "Daniel": "தானியேல்", "Hosea": "ஓசியா", "Joel": "யோவேல்", "Amos": "ஆமோஸ்", "Obadiah": "ஒபதியா",
-            "Jonah": "யோனா", "Micah": "மீகா", "Nahum": "நாகூம்", "Habakkuk": "ஆபகூக்", "Zephaniah": "செப்பனியா", "Haggai": "ஆகாய்",
-            "Zechariah": "சகரியா", "Malachi": "மலாக்கி", "Matthew": "மத்தேயு", "Mark": "மாற்கு", "Luke": "லூக்கா", "John": "யோவான்",
-            "Acts": "அப்போஸ்தலருடைய நடபடிகள்", "Romans": "ரோமர்", "1 Corinthians": "1 கொரிந்தியர்", "2 Corinthians": "2 கொரிந்தியர்", "Galatians": "கலாத்தியர்",
-            "Ephesians": "எபேசியர்", "Philippians": "பிலிப்பியர்", "Colossians": "கொலோசெயர்", "1 Thessalonians": "1 தெசலோனிக்கேயர்", "2 Thessalonians": "2 தெசலோனிக்கேயர்",
-            "1 Timothy": "1 தீமோத்தேயு", "2 Timothy": "2 தீமோத்தேயு", "Titus": "தீத்து", "Philemon": "பிலேமோன்", "Hebrews": "எபிரெயர்",
-            "James": "யாக்கோபு", "1 Peter": "1 பேதுரு", "2 Peter": "2 பேதுரு", "1 John": "1 யோவான்", "2 John": "2 யோவான்", "3 John": "3 யோவான்",
-            "Jude": "யூதா", "Revelation": "வெளிப்படுத்தின விசேஷம்"
-        };
+      const tamilBookNames = {
+        Genesis: "ஆதியாகமம்",
+        Exodus: "யாத்திராகமம்",
+        Leviticus: "லேவியராகமம்",
+        Numbers: "எண்ணாகமம்",
+        Deuteronomy: "உபாகமம்",
+        Joshua: "யோசுவா",
+        Judges: "நியாயாதிபதிகள்",
+        Ruth: "ரூத்",
+        "1 Samuel": "1 சாமுவேல்",
+        "2 Samuel": "2 சாமுவேல்",
+        "1 Kings": "1 இராஜாக்கள்",
+        "2 Kings": "2 இராஜாக்கள்",
+        "1 Chronicles": "1 நாளாகமம்",
+        "2 Chronicles": "2 நாளாகமம்",
+        Ezra: "எஸ்றா",
+        Nehemiah: "நெகேமியா",
+        Esther: "எஸ்தர்",
+        Job: "யோபு",
+        Psalms: "சங்கீதம்",
+        Proverbs: "நீதிமொழிகள்",
+        Ecclesiastes: "பிரசங்கி",
+        "Song of Solomon": "உன்னதப்பாட்டு",
+        Isaiah: "ஏசாயா",
+        Jeremiah: "எரேமியா",
+        Lamentations: "புலம்பல்",
+        Ezekiel: "எசேக்கியேல்",
+        Daniel: "தானியேல்",
+        Hosea: "ஓசியா",
+        Joel: "யோவேல்",
+        Amos: "ஆமோஸ்",
+        Obadiah: "ஒபதியா",
+        Jonah: "யோனா",
+        Micah: "மீகா",
+        Nahum: "நாகூம்",
+        Habakkuk: "ஆபகூக்",
+        Zephaniah: "செப்பனியா",
+        Haggai: "ஆகாய்",
+        Zechariah: "சகரியா",
+        Malachi: "மலாக்கி",
+        Matthew: "மத்தேயு",
+        Mark: "மாற்கு",
+        Luke: "லூக்கா",
+        John: "யோவான்",
+        Acts: "அப்போஸ்தலருடைய நடபடிகள்",
+        Romans: "ரோமர்",
+        "1 Corinthians": "1 கொரிந்தியர்",
+        "2 Corinthians": "2 கொரிந்தியர்",
+        Galatians: "கலாத்தியர்",
+        Ephesians: "எபேசியர்",
+        Philippians: "பிலிப்பியர்",
+        Colossians: "கொலோசெயர்",
+        "1 Thessalonians": "1 தெசலோனிக்கேயர்",
+        "2 Thessalonians": "2 தெசலோனிக்கேயர்",
+        "1 Timothy": "1 தீமோத்தேயு",
+        "2 Timothy": "2 தீமோத்தேயு",
+        Titus: "தீத்து",
+        Philemon: "பிலேமோன்",
+        Hebrews: "எபிரெயர்",
+        James: "யாக்கோபு",
+        "1 Peter": "1 பேதுரு",
+        "2 Peter": "2 பேதுரு",
+        "1 John": "1 யோவான்",
+        "2 John": "2 யோவான்",
+        "3 John": "3 யோவான்",
+        Jude: "யூதா",
+        Revelation: "வெளிப்படுத்தின விசேஷம்",
+      };
 
-        async function generateImage() {
-            const input = document.getElementById('reference').value.trim();
-            if (!input) return alert('Enter a reference');
+      async function generateImage() {
+        const input = document.getElementById("reference").value.trim();
+        if (!input) return alert("Enter a reference");
 
-            const parts = input.replace(/\./g, ':').match(/([a-zA-Z0-9 ]+) (\d+):(\d+)-(\d+)/);
-            if (!parts) return alert('Invalid format. Use "Book chapter:verse-verse"');
-            const englishBook = parts[1].trim();
-            let chapter = parts[2];
-            const startVerse = parseInt(parts[3]);
-            const endVerse = parseInt(parts[4]);
+        const parts = input
+          .replace(/\./g, ":")
+          .match(/([a-zA-Z0-9 ]+) (\d+):(\d+)-(\d+)/);
+        if (!parts)
+          return alert('Invalid format. Use "Book chapter:verse-verse"');
+        const englishBook = parts[1].trim();
+        let chapter = parts[2];
+        const startVerse = parseInt(parts[3]);
+        const endVerse = parseInt(parts[4]);
 
-            const bookNum = bookNums[englishBook];
-            const tamilBook = tamilBookNames[englishBook];
-            if (!bookNum || !tamilBook) return alert('Invalid book name');
+        const bookNum = bookNums[englishBook];
+        const tamilBook = tamilBookNames[englishBook];
+        if (!bookNum || !tamilBook) return alert("Invalid book name");
 
-            const numStr = bookNum.toString().padStart(2, '0');
-            const slug = englishBook.toLowerCase().replace(/ /g, '');
-            const chapterPad = chapter.padStart(2, '0');
-            let biblePath;
-            if (bookNum < 40) {
-                biblePath = `${numStr}-${slug}-${chapterPad}/`;
-            } else {
-                biblePath = `${numStr}-${slug}-chapter-${chapterPad}/`;
-            }
-            const bibleUrl = `https://www.tamilbible.org/${biblePath}`;
+        const numStr = bookNum.toString().padStart(2, "0");
+        const slug = englishBook.toLowerCase().replace(/ /g, "");
+        const chapterPad = chapter.padStart(2, "0");
+        let biblePath;
+        if (bookNum < 40) {
+          biblePath = `${numStr}-${slug}-${chapterPad}/`;
+        } else {
+          biblePath = `${numStr}-${slug}-chapter-${chapterPad}/`;
+        }
+        const bibleUrl = `https://www.tamilbible.org/${biblePath}`;
 
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(bibleUrl)}`;
-            let html;
-            try {
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error('Failed to fetch page');
-                html = await response.text();
-            } catch (e) {
-                return alert('Error fetching from tamilbible.org: ' + e);
-            }
-
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const contentElem = doc.querySelector('.entry-content') || doc.querySelector('article') || doc.body;
-            if (!contentElem) return alert('Could not find content on page');
-
-            const contentText = contentElem.innerText.trim();
-            const verseRegex = /^(\d+)\s+(.*)$/gm;
-            let match;
-            const verses = [];
-            while ((match = verseRegex.exec(contentText)) !== null) {
-                const vNum = parseInt(match[1]);
-                if (vNum >= startVerse && vNum <= endVerse) {
-                    verses.push({verse: vNum, text: match[2].trim()});
-                }
-            }
-            if (!verses.length) return alert('No verses found in range');
-
-            const canvas = document.getElementById('canvas');
-            const ctx = canvas.getContext('2d');
-            const width = 1920;
-            const height = 1080;
-            canvas.width = width;
-            canvas.height = height;
-            const leftPadding = 180;
-            const rightPadding = 180;
-            const maxTextWidth = width - leftPadding - rightPadding;
-            const lineHeight = Math.round(17 * 1.333); // 17pt line spacing, converted to pixels (1pt = 1.333px)
-            const titleY = 188;
-            const verseStartY = titleY + 104;
-            const fontSizePx = Math.round(13 * 1.333); // 13pt font size, converted to pixels
-
-            // Draw background
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(0, 0, width, height);
-
-            // Set fonts
-            const tamilFont = `${fontSizePx}px "Thamini", sans-serif`;
-            const englishFont = `${fontSizePx}px "Arial", sans-serif`;
-            ctx.fillStyle = '#ffffff';
-
-            // Draw title: Tamil left, English right-aligned
-            ctx.font = tamilFont;
-            const tamilTitle = `${tamilBook} ${chapter}.${startVerse}-${endVerse}`;
-            ctx.fillText(tamilTitle, leftPadding, titleY);
-
-            ctx.font = englishFont;
-            const englishTitle = `${englishBook} ${chapter}:${startVerse}-${endVerse}`;
-            const englishTitleWidth = ctx.measureText(englishTitle).width;
-            ctx.fillText(englishTitle, width - rightPadding - englishTitleWidth, titleY);
-
-            // Draw verses and check if they fit
-            ctx.font = tamilFont;
-            let y = verseStartY;
-            let fits = true;
-            verses.forEach(v => {
-                const verseText = `${v.verse}. ${v.text}`;
-                const verseLines = wrapText(verseText, maxTextWidth, ctx);
-                verseLines.forEach(line => {
-                    if (y + lineHeight <= height - 50) { // Ensure space at bottom
-                        ctx.fillText(line, leftPadding, y);
-                        y += lineHeight;
-                    } else {
-                        fits = false;
-                    }
-                });
-                y += lineHeight; // Space between verses
-            });
-
-            // Show error if verses don't fit
-            if (!fits) {
-                ctx.fillStyle = '#ff0000';
-                ctx.font = '24px Arial, sans-serif';
-                ctx.fillText('Error: Verses do not fit in the canvas', leftPadding, height - 50);
-            }
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(
+          bibleUrl
+        )}`;
+        let html;
+        try {
+          const response = await fetch(proxyUrl);
+          if (!response.ok) throw new Error("Failed to fetch page");
+          html = await response.text();
+        } catch (e) {
+          return alert("Error fetching from tamilbible.org: " + e);
         }
 
-        // Function to wrap text to fit width
-        function wrapText(text, maxWidth, ctx) {
-            const words = text.split(' ');
-            const lines = [];
-            let currentLine = words[0];
-            for (let i = 1; i < words.length; i++) {
-                const word = words[i];
-                const test = currentLine + ' ' + word;
-                if (ctx.measureText(test).width > maxWidth) {
-                    lines.push(currentLine);
-                    currentLine = word;
-                } else {
-                    currentLine = test;
-                }
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const contentElem =
+          doc.querySelector(".entry-content") ||
+          doc.querySelector("article") ||
+          doc.body;
+        if (!contentElem) return alert("Could not find content on page");
+
+        const contentText = contentElem.innerText.trim();
+        const verseRegex = /^(\d+)\s+(.*)$/gm;
+        let match;
+        const verses = [];
+        while ((match = verseRegex.exec(contentText)) !== null) {
+          const vNum = parseInt(match[1]);
+          if (vNum >= startVerse && vNum <= endVerse) {
+            verses.push({ verse: vNum, text: match[2].trim() });
+          }
+        }
+        if (!verses.length) return alert("No verses found in range");
+
+        // Wait for fonts to load
+        await document.fonts.ready;
+
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const width = 1920;
+        const height = 1080;
+        canvas.width = width;
+        canvas.height = height;
+        const leftPadding = 190;
+        const rightPadding = 190;
+        const topMargin = 161; // New top margin limit
+        const bottomMargin = 150; // New bottom margin limit
+        const maxTextWidth = width - leftPadding - rightPadding;
+        const lineHeight = 50; // Increased line height for better readability
+        const titleY = topMargin; // Set title at top margin
+        const verseStartY = titleY + 80; // Adjusted spacing after title
+        const verseFontSizePx = 36; // Increased font size for verses
+        const titleFontSizePx = 48; // Increased font size for title
+        const verseSpacing = lineHeight * 0.5; // Extra space between verses
+
+        // Draw background
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(0, 0, width, height);
+
+        // Set fonts
+        const tamilFont = `${verseFontSizePx}px 'Noto Sans Tamil', sans-serif`;
+        const englishFont = `${verseFontSizePx}px 'Roboto', sans-serif`;
+        const tamilTitleFont = `${titleFontSizePx}px 'Noto Sans Tamil', sans-serif`;
+        const englishTitleFont = `${titleFontSizePx}px 'Roboto', sans-serif`;
+        ctx.fillStyle = "#ffffff";
+
+        // Draw title: Tamil left, English right-aligned
+        ctx.font = tamilTitleFont;
+        const tamilTitle = `${tamilBook} ${chapter}.${startVerse}-${endVerse}`;
+        ctx.fillText(tamilTitle, leftPadding, titleY);
+
+        ctx.font = englishTitleFont;
+        const englishTitle = `${englishBook} ${chapter}:${startVerse}-${endVerse}`;
+        const englishTitleWidth = ctx.measureText(englishTitle).width;
+        ctx.fillText(
+          englishTitle,
+          width - rightPadding - englishTitleWidth,
+          titleY
+        );
+
+        // Function to draw verses with auto font size adjustment if needed
+        let currentVerseFontSize = verseFontSizePx;
+        let fits = false;
+        while (!fits && currentVerseFontSize > 10) {
+          // Minimum font size
+          fits = true;
+          ctx.font = `${currentVerseFontSize}px 'Noto Sans Tamil', sans-serif`;
+          let y = verseStartY;
+          for (let v of verses) {
+            const verseText = `${v.verse}. ${v.text}`;
+            const verseLines = wrapText(verseText, maxTextWidth, ctx);
+            for (let line of verseLines) {
+              if (y + lineHeight > height - bottomMargin) {
+                fits = false;
+                break;
+              }
+              y += lineHeight;
             }
+            if (!fits) break;
+            y += verseSpacing; // Space between verses
+          }
+          if (!fits) {
+            currentVerseFontSize -= 2; // Reduce font size
+          }
+        }
+
+        if (!fits) {
+          ctx.fillStyle = "#ff0000";
+          ctx.font = "24px Arial, sans-serif";
+          ctx.fillText(
+            "Error: Verses do not fit even with smallest font",
+            leftPadding,
+            height - bottomMargin
+          );
+          return;
+        }
+
+        // Draw verses with final font size
+        ctx.font = `${currentVerseFontSize}px 'Noto Sans Tamil', sans-serif`;
+        let y = verseStartY;
+        verses.forEach((v) => {
+          const verseText = `${v.verse}. ${v.text}`;
+          const verseLines = wrapText(verseText, maxTextWidth, ctx);
+          verseLines.forEach((line) => {
+            ctx.fillText(line, leftPadding, y);
+            y += lineHeight;
+          });
+          y += verseSpacing; // Space between verses
+        });
+
+        // Show action buttons after successful generation
+        document.getElementById("actionButtons").style.display = "flex";
+      }
+
+      // Function to wrap text to fit width
+      function wrapText(text, maxWidth, ctx) {
+        const words = text.split(" ");
+        const lines = [];
+        let currentLine = words[0];
+        for (let i = 1; i < words.length; i++) {
+          const word = words[i];
+          const test = currentLine + " " + word;
+          if (ctx.measureText(test).width > maxWidth) {
             lines.push(currentLine);
-            return lines;
+            currentLine = word;
+          } else {
+            currentLine = test;
+          }
         }
+        lines.push(currentLine);
+        return lines;
+      }
+
+      // Download button functionality
+      document.getElementById("downloadBtn").onclick = function () {
+        const canvas = document.getElementById("canvas");
+        const link = document.createElement("a");
+        link.download = "bible-verse.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      };
+
+      // Copy to clipboard functionality
+      document.getElementById("copyBtn").onclick = async function () {
+        const canvas = document.getElementById("canvas");
+        try {
+          const blob = await new Promise((resolve) => canvas.toBlob(resolve));
+          await navigator.clipboard.write([
+            new ClipboardItem({ "image/png": blob }),
+          ]);
+          alert("Image copied to clipboard!");
+        } catch (err) {
+          alert("Failed to copy image: " + err);
+        }
+      };
     </script>
-</body>
+  </body>
 </html>
